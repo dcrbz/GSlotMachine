@@ -67,7 +67,7 @@ public class RunningMachine {
 	// start
 	public void start() {
 		// take money
-		GCore.inst().getVaultIntegration().take(player, machineType.getCost());
+		GCore.inst().getEconomyHandler().take(player, machineType.getCost());
 		// start
 		taskId = new BukkitRunnable() {
 			private long delay = 2L, currentDelay = 0L, totalDuration = 0L;
@@ -143,7 +143,7 @@ public class RunningMachine {
 		}
 		// fail, so refund
 		else {
-			GCore.inst().getVaultIntegration().add(player, machineType.getCost());
+			GCore.inst().getEconomyHandler().give(player, machineType.getCost());
 		}
 		// clear items
 		for (Item item : actualItems.values()) {
