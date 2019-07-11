@@ -226,7 +226,7 @@ public class GSlotMachine extends GPlugin implements Listener {
 					Messenger.send(player, Level.SEVERE_INFO, "GSlotMachine", "Machine " + machine.getId() + " isn't correctly defined (need at least 5 items).");
 					return;
 				}
-				double balance = GCore.inst().getVaultIntegration().get(player);
+				double balance = GCore.inst().getEconomyHandler().get(player);
 				if (balance < type.getCost()) {
 					GLocale.MSG_GENERIC_NOMONEY.send(player, "{plugin}", getName(), "{balance}", Utils.round(balance), "{money}", Utils.round(type.getCost()));
 					return;
