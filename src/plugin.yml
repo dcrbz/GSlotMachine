@@ -4,7 +4,7 @@ description: 'Gamble easily with this nice machine'
 author: GuillaumeVDN
 website: www.guillaumevdn.com
 # Techy
-version: 2.0.3
+version: 2.0.4
 api-version: 1.13
 main: com.guillaumevdn.gslotmachine.GSlotMachine
 depend: [GCore,Vault]
