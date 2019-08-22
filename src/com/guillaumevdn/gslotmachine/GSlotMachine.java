@@ -32,6 +32,7 @@ import com.guillaumevdn.gslotmachine.commands.CommandSetbutton;
 import com.guillaumevdn.gslotmachine.commands.CommandSetcase;
 import com.guillaumevdn.gslotmachine.data.Machine;
 import com.guillaumevdn.gslotmachine.data.PSMDataManager;
+import com.guillaumevdn.gslotmachine.machine.MachinePrize;
 import com.guillaumevdn.gslotmachine.machine.MachineType;
 import com.guillaumevdn.gslotmachine.machine.RunningMachine;
 
@@ -146,10 +147,18 @@ public class GSlotMachine extends GPlugin implements Listener {
 		types.clear();
 		for (String id : getConfiguration().getKeysForSection("types", false)) {
 			double cost = GSlotMachine.inst().getConfiguration().getDouble("types." + id + ".cost", 100D);
-			Sound animationSound = getConfiguration().getEnumValue("types." + id + ".animation_sound", Sound.class, Sound.WOOD_CLICK);
-			Sound winSound = getConfiguration().getEnumValue("types." + id + ".win_sound", Sound.class, Sound.ORB_PICKUP);
-			Sound loseSound = getConfiguration().getEnumValue("types." + id + ".lose_sound", Sound.class, Sound.ANVIL_BREAK);
-			List<ItemData> prizes = GSlotMachine.inst().getConfiguration().getItems("types." + id + ".prizes");
+			Sound animationSound = getConfiguration().getEnumValue("types." + id + ".animation_sound", Sound.class, Sound.BLOCK_WOODEN_BUTTON_CLICK_ON);
+			Sound winSound = getConfiguration().getEnumValue("types." + id + ".win_sound", Sound.class, Sound.ENTITY_EXPERIENCE_ORB_PICKUP);
+			Sound loseSound = getConfiguration().getEnumValue("types." + id + ".lose_sound", Sound.class, Sound.BLOCK_ANVIL_BREAK);
+			List<MachinePrize> prizes = new ArrayList<MachinePrize>();
+			for (String key : GSlotMachine.inst().getConfiguration().getKeysForSection("types." + id + ".prizes", false)) {
+				ItemData item = GSlotMachine.inst().getConfiguration().getItem("types." + id + ".prizes." + key);
+				if (item != null && item.getType() != null && !item.getType().isAir() && item.getType().exists()) {
+					boolean giveItem = GSlotMachine.inst().getConfiguration().getBoolean("types." + id + ".prizes." + key + ".give_item", true);
+					List<String> commands = GSlotMachine.inst().getConfiguration().getList("types." + id + ".prizes." + key + ".commands", Utils.emptyList());
+					prizes.add(new MachinePrize(item, commands, giveItem));
+				}
+			}
 			types.put(id, new MachineType(id, cost, animationSound, winSound, loseSound, prizes));
 		}
 
@@ -202,7 +211,7 @@ public class GSlotMachine extends GPlugin implements Listener {
 	// ----------------------------------------------------------------------
 	// Listeners
 	// ----------------------------------------------------------------------
-	
+
 	private List<Integer> events = new ArrayList<Integer>();
 
 	@EventHandler

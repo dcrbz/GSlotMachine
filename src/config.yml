@@ -21,35 +21,56 @@ data:
 types:
   gold:
     cost: 100.0
-    animation_sound: WOOD_CLICK
-    win_sound: LEVEL_UP
-    lose_sound: ANVIL_BREAK
+    animation_sound: BLOCK_WOODEN_BUTTON_CLICK_ON
+    win_sound: ENTITY_PLAYER_LEVELUP
+    lose_sound: BLOCK_ANVIL_BREAK
     prizes:
       1:
         type: GOLD_INGOT
         amount: 16
         chance: 30
+        give_item: true
+        commands:
+          - 'broadcast &a{player} won 16 gold ingot in a slot machine !'
       2:
         type: DIAMOND
         amount: 1
         chance: 10
+        give_item: true
+        commands:
+          - 'broadcast &a{player} won 1 diamond in a slot machine !'
       3:
         type: QUARTZ
         amount: 32
         chance: 10
+        give_item: true
+        commands:
+          - 'broadcast &a{player} won 32 quartz in a slot machine !'
       4:
         type: COBBLESTONE
         amount: 64
         chance: 20
+        give_item: true
+        commands:
+          - 'broadcast &a{player} won 64 cobblestones in a slot machine !'
       5:
         type: APPLE
         amount: 16
         chance: 10
+        give_item: true
+        commands:
+          - 'broadcast &a{player} won 16 apples in a slot machine !'
       6:
         type: DEAD_BUSH
         amount: 16
         chance: 10
+        give_item: true
+        commands:
+          - 'broadcast &a{player} won 16 dead bushes in a slot machine !'
       7:
         type: BONE
         amount: 16
         chance: 10
+        give_item: true
+        commands:
+          - 'broadcast &a{player} won 16 bones in a slot machine !'

@@ -14,17 +14,15 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
-import com.guillaumevdn.gslotmachine.GSMLocale;
-import com.guillaumevdn.gslotmachine.GSlotMachine;
-import com.guillaumevdn.gslotmachine.data.Machine;
-import com.guillaumevdn.gslotmachine.util.MachineUtils;
-
 import com.guillaumevdn.gcore.GCore;
-import com.guillaumevdn.gcore.lib.gui.ItemData;
 import com.guillaumevdn.gcore.lib.material.Mat;
 import com.guillaumevdn.gcore.lib.util.Utils;
 import com.guillaumevdn.gcore.lib.versioncompat.particle.ParticleManager;
 import com.guillaumevdn.gcore.lib.versioncompat.sound.Sound;
+import com.guillaumevdn.gslotmachine.GSMLocale;
+import com.guillaumevdn.gslotmachine.GSlotMachine;
+import com.guillaumevdn.gslotmachine.data.Machine;
+import com.guillaumevdn.gslotmachine.util.MachineUtils;
 
 public class RunningMachine {
 
@@ -32,8 +30,8 @@ public class RunningMachine {
 	private OfflinePlayer player;
 	private Machine machine;
 	private MachineType machineType;
-	private List<ItemData> results = new ArrayList<ItemData>();
-	private ItemData tend1, tend2, tend3, result;
+	private List<MachinePrize> results = new ArrayList<MachinePrize>();
+	private MachinePrize tend1, tend2, tend3, result;
 	private int taskId = -1;
 	private Map<Integer, Item> actualItems = new HashMap<Integer, Item>();
 
@@ -44,10 +42,10 @@ public class RunningMachine {
 		// precalculate prize chances
 		results.addAll(machineType.getPrizes());
 		// precalculate result
-		List<ItemData> chances = new ArrayList<ItemData>();
-		for (ItemData it : machineType.getPrizes()) {
-			for (int i = 0; i < it.getChance(); i++) {
-				chances.add(it);
+		List<MachinePrize> chances = new ArrayList<MachinePrize>();
+		for (MachinePrize result : machineType.getPrizes()) {
+			for (int i = 0; i < result.getItem().getChance(); i++) {
+				chances.add(result);
 			}
 		}
 		while (chances.size() < 100) {
@@ -100,7 +98,7 @@ public class RunningMachine {
 		}.runTaskTimer(GSlotMachine.inst(), 0L, 1L).getTaskId();
 	}
 
-	private void setCase(int id, ItemData item) {
+	private void setCase(int id, MachinePrize result) {
 		Location loc = machine.getCase(id);
 		if (loc != null) {
 			// remove previous
@@ -108,7 +106,7 @@ public class RunningMachine {
 				actualItems.get(id).remove();
 			}
 			// add new
-			ItemStack itm = item.getItemStack();
+			ItemStack itm = result.getItem().getItemStack();
 			Item it = loc.getWorld().dropItem(loc, itm);
 			it.setPickupDelay(Integer.MAX_VALUE);
 			it.setVelocity(new Vector(0, 0, 0));
@@ -116,7 +114,7 @@ public class RunningMachine {
 			// particle effect
 			ParticleManager.INSTANCE.send(ParticleManager.Type.CLOUD, it.getLocation(), 0.0F, 1, Utils.asList(loc.getWorld().getPlayers()));
 			// sound
-			Sound.NOTE_BASS_DRUM.play(loc);
+			Sound.BLOCK_NOTE_BLOCK_BASEDRUM.play(loc);
 		}
 	}
 
@@ -133,10 +131,15 @@ public class RunningMachine {
 			}
 			// win
 			else {
+				// execute commands
+				for (String command : result.getCommands()) {
+					Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command.replace("{player}", player.getName()));
+				}
 				// give item
-				result.give(player);
-				// message
-				GSMLocale.MSG_GSLOTMACHINE_WIN.send(player, "{item}", MachineUtils.describe(result.getItemStack()));
+				if (result.getGiveItem()) {
+					result.getItem().give(player);
+					GSMLocale.MSG_GSLOTMACHINE_WIN.send(player, "{item}", MachineUtils.describe(result.getItem().getItemStack()));
+				}
 				// play sound
 				if (machineType.getWinSound() != null) machineType.getWinSound().play(player.getPlayer());
 			}

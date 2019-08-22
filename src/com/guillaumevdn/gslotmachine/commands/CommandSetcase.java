@@ -36,7 +36,7 @@ public class CommandSetcase extends CommandArgument {
 		if (machine != null && caseId != Integer.MIN_VALUE) {
 			// block
 			Block block = sender.getTargetBlock((Set<Material>) null, 5);
-			if (block == null || Mat.from(block).isAir()) {
+			if (block == null || Mat.fromBlock(block).isAir()) {
 				GLocale.MSG_GENERIC_INVALIDCROSSHAIRBLOCK.send(sender, "{plugin}", GSlotMachine.inst().getName());
 				return;
 			}
