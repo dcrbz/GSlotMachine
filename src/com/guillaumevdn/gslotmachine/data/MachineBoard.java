@@ -1,20 +1,17 @@
 package com.guillaumevdn.gslotmachine.data;
 
 import java.io.File;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.bukkit.Location;
 
-import com.guillaumevdn.gslotmachine.GSlotMachine;
-
 import com.guillaumevdn.gcore.GCore;
 import com.guillaumevdn.gcore.lib.data.DataBoard;
 import com.guillaumevdn.gcore.lib.data.mysql.Query;
 import com.guillaumevdn.gcore.lib.util.Utils;
+import com.guillaumevdn.gslotmachine.GSlotMachine;
 
 public class MachineBoard extends DataBoard<Machine> {
 
@@ -113,17 +110,18 @@ public class MachineBoard extends DataBoard<Machine> {
 	}
 
 	@Override
-	protected final void mysqlPull() throws SQLException {
-		ResultSet set = getDataManager().performMySQLGetQuery(new Query("SELECT * FROM `" + getMySQLTable() + "`;"));
-		Map<String, Machine> newMap = new HashMap<String, Machine>();
-		while (set.next()) {
-			String id = set.getString("id");
-			Machine arena = machines.containsKey(id) ? machines.get(id) : new Machine(id);
-			arena.mysqlPull(set);
-			newMap.put(id, arena);
-		}
-		machines.clear();
-		machines.putAll(newMap);
+	protected final void mysqlPull() {
+		getDataManager().performMySQLGetQuery(new Query("SELECT * FROM `" + getMySQLTable() + "`;"), set -> {
+			Map<String, Machine> newMap = new HashMap<String, Machine>();
+			while (set.next()) {
+				String id = set.getString("id");
+				Machine arena = machines.containsKey(id) ? machines.get(id) : new Machine(id);
+				arena.mysqlPull(set);
+				newMap.put(id, arena);
+			}
+			machines.clear();
+			machines.putAll(newMap);
+		});
 	}
 
 	@Override

@@ -1,6 +1,7 @@
 package com.guillaumevdn.gslotmachine.machine;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +19,6 @@ import com.guillaumevdn.gcore.GCore;
 import com.guillaumevdn.gcore.lib.material.Mat;
 import com.guillaumevdn.gcore.lib.util.Utils;
 import com.guillaumevdn.gcore.lib.versioncompat.particle.ParticleManager;
-import com.guillaumevdn.gcore.lib.versioncompat.sound.Sound;
 import com.guillaumevdn.gslotmachine.GSMLocale;
 import com.guillaumevdn.gslotmachine.GSlotMachine;
 import com.guillaumevdn.gslotmachine.data.Machine;
@@ -33,7 +33,7 @@ public class RunningMachine {
 	private List<MachinePrize> results = new ArrayList<MachinePrize>();
 	private MachinePrize tend1, tend2, tend3, result;
 	private int taskId = -1;
-	private Map<Integer, Item> actualItems = new HashMap<Integer, Item>();
+	private Map<Integer, Item> currentItems = new HashMap<Integer, Item>();
 
 	public RunningMachine(OfflinePlayer player, Machine machine, MachineType machineType) {
 		this.player = player;
@@ -42,7 +42,7 @@ public class RunningMachine {
 		// precalculate prize chances
 		results.addAll(machineType.getPrizes());
 		// precalculate result
-		List<MachinePrize> chances = new ArrayList<MachinePrize>();
+		List<MachinePrize> chances = new ArrayList<>();
 		for (MachinePrize result : machineType.getPrizes()) {
 			for (int i = 0; i < result.getItem().getChance(); i++) {
 				chances.add(result);
@@ -51,15 +51,24 @@ public class RunningMachine {
 		while (chances.size() < 100) {
 			chances.add(null);
 		}
+		Collections.shuffle(chances);
 		result = Utils.random(chances);
+		if (result == null) {
+			int tries = 0;
+			while (tend1 == tend2 && tend2 == tend3 && ++tries < 25) {
+				tend1 = Utils.random(results);
+				tend2 = Utils.random(results);
+				tend3 = Utils.random(results);
+			}
+		} else {
+			tend1 = result;
+			tend2 = result;
+			tend3 = result;
+		}
 		// open cases
 		for (Location loc : machine.getCases()) {
 			Mat.AIR.setBlock(loc.getBlock());
 		}
-		// tend
-		tend1 = result == null ? Utils.random(results) : result;
-		tend2 = result == null ? Utils.random(results) : result;
-		tend3 = result == null ? Utils.random(results) : result;
 	}
 
 	// start
@@ -92,7 +101,9 @@ public class RunningMachine {
 					setCase(2, totalDuration >= 210L ? tend2 : Utils.random(results));
 					setCase(3, totalDuration >= 240L ? tend3 : Utils.random(results));
 					// sound
-					if (machineType.getAnimationSound() != null) machineType.getAnimationSound().play(player.getPlayer());
+					if (machineType.getAnimationSound() != null) {
+						machineType.getAnimationSound().play(player.getPlayer());
+					}
 				}
 			}
 		}.runTaskTimer(GSlotMachine.inst(), 0L, 1L).getTaskId();
@@ -102,19 +113,17 @@ public class RunningMachine {
 		Location loc = machine.getCase(id);
 		if (loc != null) {
 			// remove previous
-			if (actualItems.containsKey(id)) {
-				actualItems.get(id).remove();
+			if (currentItems.containsKey(id)) {
+				currentItems.get(id).remove();
 			}
 			// add new
 			ItemStack itm = result.getItem().getItemStack();
 			Item it = loc.getWorld().dropItem(loc, itm);
 			it.setPickupDelay(Integer.MAX_VALUE);
 			it.setVelocity(new Vector(0, 0, 0));
-			actualItems.put(id, it);
+			currentItems.put(id, it);
 			// particle effect
 			ParticleManager.INSTANCE.send(ParticleManager.Type.CLOUD, it.getLocation(), 0.0F, 1, Utils.asList(loc.getWorld().getPlayers()));
-			// sound
-			Sound.BLOCK_NOTE_BLOCK_BASEDRUM.play(loc);
 		}
 	}
 
@@ -149,10 +158,10 @@ public class RunningMachine {
 			GCore.inst().getEconomyHandler().give(player, machineType.getCost());
 		}
 		// clear items
-		for (Item item : actualItems.values()) {
+		for (Item item : currentItems.values()) {
 			item.remove();
 		}
-		actualItems.clear();
+		currentItems.clear();
 		// close cases
 		for (Location loc : machine.getCases()) {
 			Mat.GLASS.setBlock(loc.getBlock());
