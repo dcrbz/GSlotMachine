@@ -2,6 +2,7 @@ package com.guillaumevdn.gslotmachine.commands;
 
 import java.util.Set;
 
+import com.guillaumevdn.gslotmachine.util.MaterialUtils;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -16,7 +17,6 @@ import com.guillaumevdn.gcore.GLocale;
 import com.guillaumevdn.gcore.lib.command.CommandArgument;
 import com.guillaumevdn.gcore.lib.command.CommandCall;
 import com.guillaumevdn.gcore.lib.command.Param;
-import com.guillaumevdn.gcore.lib.material.Mat;
 import com.guillaumevdn.gcore.lib.util.Utils;
 
 public class CommandSetcase extends CommandArgument {
@@ -36,7 +36,7 @@ public class CommandSetcase extends CommandArgument {
 		if (machine != null && caseId != Integer.MIN_VALUE) {
 			// block
 			Block block = sender.getTargetBlock((Set<Material>) null, 5);
-			if (block == null || Mat.from(block).isAir()) {
+			if (MaterialUtils.isAir(block.getType())) {
 				GLocale.MSG_GENERIC_INVALIDCROSSHAIRBLOCK.send(sender, "{plugin}", GSlotMachine.inst().getName());
 				return;
 			}

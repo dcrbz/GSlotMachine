@@ -113,17 +113,18 @@ public class MachineBoard extends DataBoard<Machine> {
 	}
 
 	@Override
-	protected final void mysqlPull() throws SQLException {
-		ResultSet set = getDataManager().performMySQLGetQuery(new Query("SELECT * FROM `" + getMySQLTable() + "`;"));
-		Map<String, Machine> newMap = new HashMap<String, Machine>();
-		while (set.next()) {
-			String id = set.getString("id");
-			Machine arena = machines.containsKey(id) ? machines.get(id) : new Machine(id);
-			arena.mysqlPull(set);
-			newMap.put(id, arena);
-		}
-		machines.clear();
-		machines.putAll(newMap);
+	protected final void mysqlPull() {
+		getDataManager().performMySQLGetQuery(new Query("SELECT * FROM `" + getMySQLTable() + "`;"), set -> {
+			Map<String, Machine> newMap = new HashMap<String, Machine>();
+			while (set.next()) {
+				String id = set.getString("id");
+				Machine arena = machines.containsKey(id) ? machines.get(id) : new Machine(id);
+				arena.mysqlPull(set);
+				newMap.put(id, arena);
+			}
+			machines.clear();
+			machines.putAll(newMap);
+		});
 	}
 
 	@Override

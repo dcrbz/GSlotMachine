@@ -2,20 +2,18 @@ package com.guillaumevdn.gslotmachine.machine;
 
 import java.util.List;
 
-import com.guillaumevdn.gcore.lib.gui.ItemData;
-import com.guillaumevdn.gcore.lib.versioncompat.sound.Sound;
-
 public class MachineType {
 
 	// fields and constructor
 	private String id;
 	private double cost;
-	private Sound animationSound, winSound, loseSound;
-	private List<ItemData> prizes;
+	private String spinSound, animationSound, winSound, loseSound;
+	private List<MachineItem> prizes;
 
-	public MachineType(String id, double cost, Sound animationSound, Sound winSound, Sound loseSound, List<ItemData> prizes) {
+	public MachineType(String id, double cost, String spinSound, String animationSound, String winSound, String loseSound, List<MachineItem> prizes) {
 		this.id = id;
 		this.cost = cost;
+		this.spinSound = spinSound;
 		this.animationSound = animationSound;
 		this.winSound = winSound;
 		this.loseSound = loseSound;
@@ -36,19 +34,23 @@ public class MachineType {
 		return cost;
 	}
 
-	public Sound getAnimationSound() {
+	public String getSpinSound() {
+		return spinSound;
+	}
+
+	public String getAnimationSound() {
 		return animationSound;
 	}
 
-	public Sound getWinSound() {
+	public String getWinSound() {
 		return winSound;
 	}
 
-	public Sound getLoseSound() {
+	public String getLoseSound() {
 		return loseSound;
 	}
 
-	public List<ItemData> getPrizes() {
+	public List<MachineItem> getPrizes() {
 		return prizes;
 	}
 
